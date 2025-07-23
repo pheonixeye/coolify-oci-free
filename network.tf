@@ -1,5 +1,5 @@
 # VCN configuration
-resource "oci_core_vcn" "coolify_vcn" {
+resource "coolify_vcn" {
   cidr_block     = "10.0.0.0/16"
   compartment_id = var.compartment_id
   display_name   = "network-coolify-${random_string.resource_code.result}"
@@ -7,7 +7,7 @@ resource "oci_core_vcn" "coolify_vcn" {
 }
 
 # Subnet configuration
-resource "oci_core_subnet" "coolify_subnet" {
+resource "coolify_subnet" {
   cidr_block     = "10.0.0.0/24"
   compartment_id = var.compartment_id
   display_name   = "subnet-coolify-${random_string.resource_code.result}"
@@ -16,11 +16,11 @@ resource "oci_core_subnet" "coolify_subnet" {
   vcn_id         = oci_core_vcn.coolify_vcn.id
 
   # Attach the security list
-  security_list_ids = [oci_core_security_list.coolify_security_list.id]
+  security_list_ids = [coolify_security_list.id]
 }
 
 # Internet Gateway configuration
-resource "oci_core_internet_gateway" "coolify_internet_gateway" {
+resource "coolify_internet_gateway" {
   compartment_id = var.compartment_id
   display_name   = "Internet Gateway network-coolify"
   enabled        = true
@@ -28,20 +28,20 @@ resource "oci_core_internet_gateway" "coolify_internet_gateway" {
 }
 
 # Default Route Table
-resource "oci_core_default_route_table" "coolify_default_route_table" {
+resource "coolify_default_route_table" {
   manage_default_resource_id = oci_core_vcn.coolify_vcn.default_route_table_id
 
   route_rules {
     destination       = "0.0.0.0/0"
     destination_type  = "CIDR_BLOCK"
-    network_entity_id = oci_core_internet_gateway.coolify_internet_gateway.id
+    network_entity_id = coolify_internet_gateway.id
   }
 }
 
 # Security List for Coolify
-resource "oci_core_security_list" "coolify_security_list" {
+resource "coolify_security_list" {
   compartment_id = var.compartment_id
-  vcn_id         = oci_core_vcn.coolify_vcn.id
+  vcn_id         = coolify_vcn.id
   display_name   = "Coolify Security List"
 
   # Ingress Rules for Coolify and Reverse Proxy
